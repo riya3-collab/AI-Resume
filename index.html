@@ -75,6 +75,7 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
 
     <py-script>
         from js import document, console
+        from pyodide.ffi import create_proxy
         import re
         import asyncio
 
@@ -100,7 +101,7 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
                     found[kw] = {**L60_KEYWORDS, **L65_BONUS}[kw]
             return found
 
-        async def analyze_resume(event):
+        async def analyze_resume(event=None):
             output = document.getElementById("output")
             output.innerHTML = '<p class="neon-purple">// Analyzing with Python NLP... //</p>'
             await asyncio.sleep(0.3)
@@ -111,25 +112,19 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
             jd_keywords = extract_keywords(jd_text)
             resume_keywords = extract_keywords(resume_text)
 
-            # 90 LPA Scoring Algorithm
             total_possible = sum(jd_keywords.values()) if jd_keywords else 100
             matched_score = sum(score for kw, score in resume_keywords.items() if kw in jd_keywords)
             score_percent = int((matched_score / total_possible * 100)) if total_possible else 0
             score_percent = min(score_percent, 100)
 
-            # L65 Bonus Check
             l65_bonus = sum(score for kw, score in resume_keywords.items() if kw in L65_BONUS)
-
-            # Missing Keywords
             missing = {kw: score for kw, score in jd_keywords.items() if kw not in resume_keywords}
 
-            # Verdict
             if score_percent >= 85: verdict, color = "L65 PRINCIPAL READY", "#10b981"
             elif score_percent >= 70: verdict, color = "L60 SENIOR READY", "#6366f1"
             elif score_percent >= 50: verdict, color = "L59 SDE-2 READY", "#f59e0b"
             else: verdict, color = "NEEDS IMPROVEMENT", "#ef4444"
 
-            # Render
             output.innerHTML = f'''
             <div class="score-circle" style="background: conic-gradient({color} {score_percent * 3.6}deg, #1e1e3f 0deg);">
                 {score_percent}%
@@ -148,16 +143,17 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
                     <p style="font-size:14px; margin-top:10px;">// Add these to hit 90 LPA //</p>
                 </div>
             </div>
-
-            <h3 class="neon-purple">90 LPA Suggestions:</h3>
-            <p>1. Add missing keywords to Projects section with metrics<br>
-               2. "Reduced latency 80%" > "Used WebSockets"<br>
-               3. Mention L65 terms: "Principal", "10M users", "Cost Optimization"</p>
             '''
             console.log(f"90LPA Resume Score: {score_percent}% | L65 Bonus: {l65_bonus}")
 
-        # Auto-run on load
-        asyncio.ensure_future(analyze_resume(None))
+        # 90 LPA FIX: Bind button click properly + auto-run
+        def setup():
+            btn = document.querySelector("button")
+            btn.addEventListener("click", create_proxy(analyze_resume))
+            # Auto-run on load after 1 sec
+            asyncio.ensure_future(analyze_resume())
+
+        setup()
     </py-script>
 </body>
 </html>
