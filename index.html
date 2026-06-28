@@ -4,30 +4,24 @@
     <title>AI Resume 90LPA | Trupti</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap');
         body {
-            background: #0f0f1e;
-            color: #e0e0ff;
-            font-family: 'Space Grotesk', sans-serif;
+            background: #0f0f1e; color: #e0e0ff; font-family: 'Space Grotesk', sans-serif;
             margin: 0; padding: 20px;
             background-image: radial-gradient(circle at 10% 20%, #6366f122 0%, transparent 50%),
                               radial-gradient(circle at 90% 80%, #8b5cf622 0%, transparent 50%);
         }
-     .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid #6366f144;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 0 40px #6366f133;
-            max-width: 900px; margin: 20px auto;
+    .glass {
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px);
+            border: 1px solid #6366f144; border-radius: 16px; padding: 30px;
+            box-shadow: 0 0 40px #6366f133; max-width: 900px; margin: 20px auto;
         }
         h1 { text-align: center; background: linear-gradient(90deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-     .neon-purple { color: #8b5cf6; text-shadow: 0 0 8px #8b5cf6; }
-        textarea, input[type=file] {
+    .neon-purple { color: #8b5cf6; text-shadow: 0 0 8px #8b5cf6; }
+        textarea {
             background: #0f0f1e; border: 1px solid #6366f1; color: #e0e0ff;
             padding: 12px; border-radius: 8px; font-family: 'Space Grotesk';
             width: 100%; margin: 10px 0; box-sizing: border-box;
@@ -39,43 +33,38 @@
         }
         button:hover { box-shadow: 0 0 20px #8b5cf6; transform: translateY(-2px); }
         #output { margin-top: 25px; }
-     .score-circle {
+    .score-circle {
             width: 120px; height: 120px; border-radius: 50%;
-            background: conic-gradient(#8b5cf6 0deg, #6366f1 0deg, #1e1e3f 0deg);
+            background: conic-gradient(#8b5cf6 0deg, #1e1e3f 0deg);
             display: flex; align-items: center; justify-content: center;
             margin: 20px auto; font-size: 28px; font-weight: 700;
         }
-     .keyword { display: inline-block; background: #6366f122; border: 1px solid #6366f1;
+    .keyword { display: inline-block; background: #6366f122; border: 1px solid #6366f1;
                   padding: 5px 10px; border-radius: 20px; margin: 4px; font-size: 14px; }
-     .missing { background: #ef444422; border-color: #ef4444; color: #ef4444; }
-     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .missing { background: #ef444422; border-color: #ef4444; color: #ef4444; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 768px) {.grid { grid-template-columns: 1fr; } }
+        #loading { text-align: center; color: #8b5cf6; }
     </style>
 </head>
 <body>
     <div class="glass">
         <h1>AI RESUME <span class="neon-purple">90LPA</span> ANALYZER</h1>
         <p>// Python + PyScript + NLP: ATS Score for Microsoft L60/L65 //</p>
+        <div id="loading">// Loading Python Runtime... 90 LPA incoming //</div>
 
         <label><b>1. Paste Microsoft Job Description:</b></label>
-        <textarea id="jd" rows="6" placeholder="Paste Microsoft SDE L60 JD here...">Microsoft SDE L60: 5+ years Python, System Design, Distributed Systems, Azure, Kubernetes, Low-latency, WebSockets, React, SQL, NoSQL, Leadership, Mentoring</textarea>
+        <textarea id="jd" rows="6">Microsoft SDE L60: 5+ years Python, System Design, Distributed Systems, Azure, Kubernetes, Low-latency, WebSockets, React, SQL, NoSQL, Leadership, Mentoring</textarea>
 
         <label><b>2. Paste Your Resume Text:</b></label>
-        <textarea id="resume" rows="10" placeholder="Paste your resume text here...">Trupti - SDE
-Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL. Built 5 apps: Trading Dashboard, LeetCode Stats, Netflix Clone. 90 LPA target.</textarea>
+        <textarea id="resume" rows="10">Trupti - SDE Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL. Built 5 apps: Trading Dashboard, LeetCode Stats, Netflix Clone. 90 LPA target.</textarea>
 
-        <button py-click="analyze_resume">ANALYZE RESUME - 90LPA SCORE</button>
-
+        <button id="analyze-btn">ANALYZE RESUME - 90LPA SCORE</button>
         <div id="output"></div>
     </div>
 
-    <py-config>
-        packages = ["re"]
-    </py-config>
-
     <py-script>
-        from js import document, console
-        from pyodide.ffi import create_proxy
+        from js import document, console, window
         import re
         import asyncio
 
@@ -101,10 +90,9 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
                     found[kw] = {**L60_KEYWORDS, **L65_BONUS}[kw]
             return found
 
-        async def analyze_resume(event=None):
+        def analyze_resume(event=None):
             output = document.getElementById("output")
             output.innerHTML = '<p class="neon-purple">// Analyzing with Python NLP... //</p>'
-            await asyncio.sleep(0.3)
 
             jd_text = document.getElementById("jd").value
             resume_text = document.getElementById("resume").value
@@ -131,7 +119,6 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
             </div>
             <h2 style="text-align:center; color:{color};">{verdict}</h2>
             <p style="text-align:center;">L65 Bonus Points: +{l65_bonus} | 90 LPA Match</p>
-
             <div class="grid">
                 <div>
                     <h3 class="neon-purple">✅ Matched Keywords</h3>
@@ -140,20 +127,21 @@ Python, PyScript, WebSockets, LRU Cache, GitHub Pages, System Design, React, SQL
                 <div>
                     <h3 class="neon-purple">❌ Missing from Resume</h3>
                     {''.join([f'<span class="keyword missing">{kw} +{score}</span>' for kw, score in missing.items()])}
-                    <p style="font-size:14px; margin-top:10px;">// Add these to hit 90 LPA //</p>
                 </div>
             </div>
             '''
             console.log(f"90LPA Resume Score: {score_percent}% | L65 Bonus: {l65_bonus}")
 
-        # 90 LPA FIX: Bind button click properly + auto-run
-        def setup():
-            btn = document.querySelector("button")
-            btn.addEventListener("click", create_proxy(analyze_resume))
-            # Auto-run on load after 1 sec
-            asyncio.ensure_future(analyze_resume())
+        # 90 LPA FIX: Wait for DOM + Use stable PyScript version
+        def main():
+            document.getElementById("loading").style.display = "none"
+            btn = document.getElementById("analyze-btn")
+            btn.onclick = analyze_resume
+            # Auto-run once on load
+            analyze_resume()
 
-        setup()
+        # PyScript 2023.11.1 is stable. Run after DOM loads
+        window.addEventListener("load", main)
     </py-script>
 </body>
 </html>
